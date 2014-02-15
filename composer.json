@@ -1,0 +1,29 @@
+{
+    "name":        "cerad/core",
+    "type":        "symfony-bundle",
+    "description": "Symfony Cerad Core Bundle",
+    "keywords":    ["cerad","zayso"],
+    "homepage":    "http://github.com/cerad/CoreBundle",
+    "license":     "MIT",
+    "authors": [
+        {
+            "name": "Art Hundiak",
+            "email": "ahundiak@gmail.com",
+            "homepage": "http://zayso.org",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/event-dispatcher":     "~2.3",
+        "symfony/http-foundation":      "~2.3",
+        "symfony/dependency-injection": "~2.3",
+        "symfony/debug":                "~2.3",
+        "psr/log": "~1.0"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": { "Cerad\\Bundle\\CoreBundle\\": "" }
+    },
+    "target-dir": "Cerad/Bundle/CoreBundle"
+}
