@@ -1,0 +1,18 @@
+parameters:
+  
+    cerad_core__core_request_listener__class: Cerad\Bundle\CoreBundle\EventListener\CoreRequestListener
+    cerad_core__p3p_response_listener__class: Cerad\Bundle\CoreBundle\EventListener\P3PResponseListener
+      
+services:
+  
+    cerad_core__core_request_listener:
+        class:  '%cerad_core__core_request_listener__class%'
+        calls:
+            - [setContainer, ['@service_container']]
+        tags:
+            - { name: kernel.event_subscriber }
+
+    cerad_core__p3p_response_listener:
+        class:  '%cerad_core__p3p_response_listener__class%'
+        tags:
+            - { name: kernel.event_subscriber }
