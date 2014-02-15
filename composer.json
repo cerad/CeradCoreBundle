@@ -1,5 +1,5 @@
 {
-    "name":        "cerad/core",
+    "name":        "cerad/core-bundle",
     "type":        "symfony-bundle",
     "description": "Symfony Cerad Core Bundle",
     "keywords":    ["cerad","zayso"],
