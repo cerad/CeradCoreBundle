@@ -7,3 +7,6 @@ However, the Model/Role/Form listeners needed a home.  So here we are.
 
 And now see what happens if this becomes an actual repository of it's own.
 
+Copied composer.json from packagist, symfony and fos.
+
+Did the packagist thing and the service hook in github.  I think.
