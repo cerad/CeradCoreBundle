@@ -17,13 +17,14 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  * This causes core to depend on other bundles
  * Really want each bundle to depend on the core
  */
-use Symfony\Component\EventDispatcher\Event as PersonFindEvent;
-use Symfony\Component\EventDispatcher\Event as PersonPlanFindEvent;
-
-use Cerad\Bundle\PersonBundle\PersonEvents;
-
 use Cerad\Bundle\CoreBundle\Events\ProjectEvents;
-use Cerad\Bundle\CoreBundle\Event\Project\FindByEvent as ProjectFindEvent;
+
+use Cerad\Bundle\CoreBundle\Event\Project\FindByEvent as FindProjectEvent;
+
+use Cerad\Bundle\CoreBundle\Events\PersonEvents;
+
+use Cerad\Bundle\CoreBundle\Event\Person\FindByEvent as FindPersonEvent;
+use Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
 
 /* ========================================================
  * Rather poorly named but takes care of creating the model,form and possible view
@@ -47,7 +48,7 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         return array(KernelEvents::CONTROLLER => array(
             array('doRole',          -1100),
             array('doProject',       -1200),
-            array('doProjectPerson', -1210),
+            array('doPersonPlan',    -1210),
             array('doModel',         -1900),
             array('doModelForm',     -1910),
         ));
@@ -90,61 +91,52 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         $projectSlug = $eventx->getRequest()->attributes->get('_project');
         
         // Then the project
-        $projectFindEvent = new ProjectFindEvent($projectSlug);
+        $findProjectEvent = new FindProjectEvent($projectSlug);
         $dispatcher = $this->container->get('event_dispatcher');
-        $dispatcher->dispatch(ProjectEvents::FindProjectBySlug,$projectFindEvent);
+        $dispatcher->dispatch(ProjectEvents::FindProjectBySlug,$findProjectEvent);
         
-        $project = $projectFindEvent->getProject();
+        $project = $findProjectEvent->getProject();
         
         if (!$project) throw new NotFoundHttpException('Project not found ' . $projectSlug);
         
         // Stash it
         $eventx->getRequest()->attributes->set('project',$project);
     }
-    public function doProjectPerson(FilterControllerEvent $eventx)
+    public function doPersonPlan(FilterControllerEvent $eventx)
     {
         // Will a sub request ever change projects?
         if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
         
         // Only process routes asking for a project
-        if (!$eventx->getRequest()->attributes->has('_projectPerson')) return;
+        $request = $eventx->getRequest();
+        if (!$request->attributes->has('_projectPerson')) return;
 
         // Pull the person id
-        $personId = $eventx->getRequest()->attributes->get('_projectPerson');
-        if (!$personId)
-        {
-            // Suppose coud try current user person?
-            throw new NotFoundHttpException('No PersonID For _projectPerson');    
-        }
+        $personId = $request->attributes->get('_projectPerson');
         
         // Find The Person
-        $personFindEvent = new PersonFindEvent;
-        $personFindEvent->id   = $personId;
+        $findPersonEvent = new FindPersonEvent($personId);
         $dispatcher = $this->container->get('event_dispatcher');
-        $dispatcher->dispatch(PersonEvents::FindPersonById,$personFindEvent);
+        $dispatcher->dispatch(PersonEvents::FindPersonById,$findPersonEvent);
         
-        $person = $personFindEvent->person;
+        $person = $findPersonEvent->getPerson();
         
         if (!$person) throw new NotFoundHttpException('No Person For _projectPerson ' . $personId);
         
         // Stash it
-        $eventx->getRequest()->attributes->set('person',$person);
+        $request->attributes->set('person',$person);
         
          // Find The Plan
-        $planFindEvent = new PersonPlanFindEvent;
-        $planFindEvent->project = $eventx->getRequest()->attributes->get('project');
-        $planFindEvent->person  = $eventx->getRequest()->attributes->get('person');
+        $findPlanEvent = new FindPlanByProjectAndPersonEvent($request->attributes->get('project'),$person);
         
-      //$dispatcher = $this->container->get('event_dispatcher');
+        $dispatcher->dispatch(PersonEvents::FindPlanByProjectAndPerson,$findPlanEvent);
         
-        $dispatcher->dispatch(PersonEvents::FindPlanByProjectAndPerson,$planFindEvent);
-        
-        $plan = $planFindEvent->plan;
+        $plan = $findPlanEvent->getPlan();
         
         if (!$plan) throw new NotFoundHttpException('No Plan For _projectPerson ' . $personId);
         
         // Stash it
-        $eventx->getRequest()->attributes->set('plan',$plan);
+        $request->attributes->set('personPlan',$plan);
 
     }
     /* ==========================================================
