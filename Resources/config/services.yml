@@ -1,18 +1,53 @@
 parameters:
   
+    cerad_core__model__event_listener__class: Cerad\Bundle\CoreBundle\EventListener\ModelEventListener
+    
     cerad_core__core_request_listener__class: Cerad\Bundle\CoreBundle\EventListener\CoreRequestListener
     cerad_core__p3p_response_listener__class: Cerad\Bundle\CoreBundle\EventListener\P3PResponseListener
       
 services:
-  
-    cerad_core__core_request_listener:
-        class:  '%cerad_core__core_request_listener__class%'
+
+# ======================================================
+# Event Listeners
+    cerad_core__model__event_listener:
+        class:  '%cerad_core__model__event_listener__class%'
         calls:
             - [setContainer, ['@service_container']]
         tags:
             - { name: kernel.event_subscriber }
+            
+    cerad_core__core_request_listener:
+        class:  '%cerad_core__core_request_listener__class%'
+        calls:
+            - [setContainer, ['@service_container']]
+       #tags:
+       #    - { name: kernel.event_subscriber }
 
     cerad_core__p3p_response_listener:
         class:  '%cerad_core__p3p_response_listener__class%'
         tags:
             - { name: kernel.event_subscriber }
+
+# =======================================================================
+# ProjectPerson Register
+#
+    cerad_person__project__project_person__register__model_factory:
+        class: Cerad\Bundle\AppBundle\Action\ProjectPerson\ProjectPersonModel
+        calls:
+             - [setDispatcher,['@event_dispatcher']]
+        arguments:
+           #- '@cerad_game__game__repository'
+           #- '@cerad_game__game_field__repository'
+            
+    cerad_person__project__project_person__register__form_factory:
+        class: Cerad\Bundle\AppBundle\Action\ProjectPerson\Register\ProjectPersonRegisterFormFactory
+        calls:
+             - [setRouter,      ['@router']]
+             - [setFormFactory, ['@form.factory']]
+             
+    cerad_person__project__project_person__register__controller:
+        class: Cerad\Bundle\AppBundle\Action\ProjectPerson\Register\ProjectPersonRegisterController
+        calls:
+             - [setRouter,     ['@router']]
+             - [setTemplating, ['@templating']]
+ 

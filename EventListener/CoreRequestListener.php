@@ -103,7 +103,7 @@ class CoreRequestListener extends ContainerAware implements EventSubscriberInter
      * Main processor
      */
     public function onKernelRequest(GetResponseEvent $event)
-    {
+    {die('CoreRequestListener');
         // Will a sub request ever change this?
         if (HttpKernel::MASTER_REQUEST != $event->getRequestType()) return;
         
