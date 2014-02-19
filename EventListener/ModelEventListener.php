@@ -48,7 +48,8 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         return array(KernelEvents::CONTROLLER => array(
             array('doRole',          -1100),
             array('doProject',       -1200),
-            array('doPersonPlan',    -1210),
+            array('doPerson',        -1300),
+          //array('doProjectPerson', -1210),
             array('doModel',         -1900),
             array('doModelForm',     -1910),
         ));
@@ -87,57 +88,44 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         // Only process routes asking for a project
         if (!$eventx->getRequest()->attributes->has('_project')) return;
 
-        // Pull the slug
-        $projectSlug = $eventx->getRequest()->attributes->get('_project');
+        // Pull the search
+        $projectSearch = $eventx->getRequest()->attributes->get('_project');
         
         // Then the project
-        $findProjectEvent = new FindProjectEvent($projectSlug);
+        $findProjectEvent = new FindProjectEvent($projectSearch);
         $dispatcher = $this->container->get('event_dispatcher');
-        $dispatcher->dispatch(ProjectEvents::FindProjectBySlug,$findProjectEvent);
+        $dispatcher->dispatch(ProjectEvents::FindProject,$findProjectEvent);
         
         $project = $findProjectEvent->getProject();
         
-        if (!$project) throw new NotFoundHttpException('Project not found ' . $projectSlug);
+        if (!$project) throw new NotFoundHttpException('Project not found ' . $projectSearch);
         
         // Stash it
         $eventx->getRequest()->attributes->set('project',$project);
     }
-    public function doPersonPlan(FilterControllerEvent $eventx)
+    public function doPerson(FilterControllerEvent $eventx)
     {
         // Will a sub request ever change projects?
         if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
         
         // Only process routes asking for a project
         $request = $eventx->getRequest();
-        if (!$request->attributes->has('_projectPerson')) return;
+        if (!$request->attributes->has('_person')) return;
 
         // Pull the person id
-        $personId = $request->attributes->get('_projectPerson');
+        $personId = $request->attributes->get('_person');
         
         // Find The Person
         $findPersonEvent = new FindPersonEvent($personId);
         $dispatcher = $this->container->get('event_dispatcher');
-        $dispatcher->dispatch(PersonEvents::FindPersonById,$findPersonEvent);
+        $dispatcher->dispatch(PersonEvents::FindPerson,$findPersonEvent);
         
         $person = $findPersonEvent->getPerson();
         
-        if (!$person) throw new NotFoundHttpException('No Person For _projectPerson ' . $personId);
+        if (!$person) throw new NotFoundHttpException('No Person For %d ' . $personId);
         
         // Stash it
         $request->attributes->set('person',$person);
-        
-         // Find The Plan
-        $findPlanEvent = new FindPlanByProjectAndPersonEvent($request->attributes->get('project'),$person);
-        
-        $dispatcher->dispatch(PersonEvents::FindPlanByProjectAndPerson,$findPlanEvent);
-        
-        $plan = $findPlanEvent->getPlan();
-        
-        if (!$plan) throw new NotFoundHttpException('No Plan For _projectPerson ' . $personId);
-        
-        // Stash it
-        $request->attributes->set('personPlan',$plan);
-
     }
     /* ==========================================================
      * The Model
