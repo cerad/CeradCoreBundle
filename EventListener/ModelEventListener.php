@@ -17,14 +17,13 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  * This causes core to depend on other bundles
  * Really want each bundle to depend on the core
  */
+use Cerad\Bundle\CoreBundle\Events\PersonEvents;
 use Cerad\Bundle\CoreBundle\Events\ProjectEvents;
 
-use Cerad\Bundle\CoreBundle\Event\Project\FindByEvent as FindProjectEvent;
+use Cerad\Bundle\CoreBundle\Event\FindPersonEvent;
+use Cerad\Bundle\CoreBundle\Event\FindProjectEvent;
 
-use Cerad\Bundle\CoreBundle\Events\PersonEvents;
-
-use Cerad\Bundle\CoreBundle\Event\Person\FindByEvent as FindPersonEvent;
-use Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
+//  Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
 
 /* ========================================================
  * Rather poorly named but takes care of creating the model,form and possible view

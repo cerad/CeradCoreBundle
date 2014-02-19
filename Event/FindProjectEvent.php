@@ -4,19 +4,19 @@ namespace Cerad\Bundle\CoreBundle\Event;
 
 use Symfony\Component\EventDispatcher\Event;
 
-use Cerad\Bundle\CoreBundle\Event\Project\FindByEvent;
-
-class FindProjectEvent extends FindByEvent
+class FindProjectEvent extends Event
 {
-    protected $param;
+    protected $search;
     protected $project;
     
-    public function __construct($param)
+    public function __construct($search)
     {
-        $this->param = $param;
+        $this->search = trim($search);
     }
     public function getProject()         { return $this->project;     }
     public function setProject($project) { $this->project = $project; }
 
-    public function getParam() { return $this->param; }   
+    // Can't decide on the name
+    public function getParam () { return $this->search; }   
+    public function getSearch() { return $this->search; }   
 }
