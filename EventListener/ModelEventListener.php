@@ -36,18 +36,14 @@ use Cerad\Bundle\CoreBundle\Event\FindProjectEvent;
  */
 class ModelEventListener extends ContainerAware implements EventSubscriberInterface
 {
-    const UserEventListenerPriority    =  -16;
-    const ProjectEventListenerPriority =  -32;
-    const GameEventListenerPriority    =  -64;
-    const PersonEventListenerPriority  =  -64;
-    const ModelRequestListenerPriority = -256;
     
     public static function getSubscribedEvents()
     {
         return array(KernelEvents::CONTROLLER => array(
             array('doRole',          -1100),
-            array('doProject',       -1200),
-            array('doPerson',        -1300),
+            array('doUser',          -1200),
+            array('doProject',       -1300),
+            array('doPerson',        -1400),
           //array('doProjectPerson', -1210),
             array('doModel',         -1900),
             array('doModelForm',     -1910),
@@ -75,6 +71,24 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
             // Test  for ROLE_USER - ROLE_ADMIN
             throw new AccessDeniedException(); 
         }
+    }
+    public function doUser(FilterControllerEvent $doEvent)
+    {
+        if (!$doEvent->getRequest()->attributes->has('_user')) return;
+        if ( $doEvent->getRequest()->attributes->has( 'user')) return; // Already got
+        
+        $securityContext = $this->container->get('security.context');
+        
+        // Follow the logic in S2 Controller::getUser
+        $doEvent->getRequest()->attributes->set('user',null);
+        
+        $token = $securityContext->getToken();
+        if (!$token) return;
+        
+        $user = $token->getUser();
+        if (!is_object($user)) return;
+        
+        $doEvent->getRequest()->attributes->set('user',$user);
     }
     /* =======================================================
      * I think we want this to be completely self contained
@@ -128,10 +142,11 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
     }
     /* ==========================================================
      * The Model
+     * Does get called in sub requests
      */
     public function doModel(FilterControllerEvent $eventx)
-    {
-        if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
+    {   
+      //if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
         
         $request = $eventx->getRequest();
         
@@ -140,10 +155,27 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         $modelFactoryServiceId = $request->attributes->get('_model');
         
         $modelFactory = $this->container->get($modelFactoryServiceId);
-        
+     
         $model = $modelFactory->create($request);
         
         $request->attributes->set('model',$model);
+        
+        return;
+        
+      //$sub = (HttpKernel::MASTER_REQUEST == $eventx->getRequestType()) ? false : true;
+        
+        if ($sub)
+        {
+            //$request->attributes->set('foo','bar2');
+            //return;
+        }
+       
+        if (HttpKernel::MASTER_REQUEST == $eventx->getRequestType())
+        {
+            $request->attributes->set('model',$model);
+            return;
+        }
+        $request->attributes->set('foo',$model);
     }
     /* ==========================================================
      * The Model Form

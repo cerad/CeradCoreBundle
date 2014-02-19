@@ -29,6 +29,14 @@ services:
             - { name: kernel.event_subscriber }
 
 # =======================================================================
+# Twig Extension
+    cerad_core__twig_extension:
+        class: Cerad\Bundle\CoreBundle\TwigExtension\CoreExtension
+        arguments: ['@router']
+        tags:
+            - { name: twig.extension }
+        
+# =======================================================================
 # ProjectPerson Register
 #
     cerad_person__project__project_person__register__model_factory:
