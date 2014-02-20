@@ -16,4 +16,6 @@ final class PersonEvents
     const FindPlanByProjectAndPerson     = 'CeradPersonFindPlanByProjectAndPerson';
     const FindPlanByProjectAndPersonId   = 'CeradPersonFindPlanByProjectAndPersonId';
     const FindPlanByProjectAndPersonName = 'CeradPersonFindPlanByProjectAndPersonName';
+    
+    const RegisterProjectPerson = 'CeradPersonRegisterProjectPerson';
 }
