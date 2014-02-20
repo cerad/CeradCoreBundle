@@ -55,6 +55,9 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
             ),
         );
     }
+    /* =================================================================
+     * Creates and renders a view
+     */
     public function doView(GetResponseForControllerResultEvent $doEvent)
     {
         if (!$doEvent->getRequest()->attributes->has('_view')) return;
@@ -189,13 +192,11 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
      * The Model
      * Does get called in sub requests
      */
-    public function doModel(FilterControllerEvent $eventx)
+    public function doModel(FilterControllerEvent $doEvent)
     {   
-      //if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
+        if (!$doEvent->getRequest()->attributes->has('_model')) return;
         
-        $request = $eventx->getRequest();
-        
-        if (!$request->attributes->has('_model')) return;
+        $request = $doEvent->getRequest();
 
         $modelFactoryServiceId = $request->attributes->get('_model');
         
@@ -204,35 +205,16 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         $model = $modelFactory->create($request);
         
         $request->attributes->set('model',$model);
-        
-        return;
-        
-      //$sub = (HttpKernel::MASTER_REQUEST == $eventx->getRequestType()) ? false : true;
-        
-        if ($sub)
-        {
-            //$request->attributes->set('foo','bar2');
-            //return;
-        }
-       
-        if (HttpKernel::MASTER_REQUEST == $eventx->getRequestType())
-        {
-            $request->attributes->set('model',$model);
-            return;
-        }
-        $request->attributes->set('foo',$model);
     }
     /* ==========================================================
      * The Model Form
      */
-    public function doModelForm(FilterControllerEvent $eventx)
-    {
-        if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
+    public function doModelForm(FilterControllerEvent $doEvent)
+    {   
+        if (!$doEvent->getRequest()->attributes->has('_form')) return;
         
-        $request = $eventx->getRequest();
+        $request = $doEvent->getRequest();
         
-        if (!$request->attributes->has('_form')) return;
-
         $formFactoryServiceId = $request->attributes->get('_form');
         
         $formFactory = $this->container->get($formFactoryServiceId);
@@ -240,88 +222,5 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         $form = $formFactory->create($request,$request->attributes->get('model'));
         
         $request->attributes->set('form',$form);
-    }
-    /* =====================================================================
-     * Old stuff
-     */
-    protected function onKernelRequestUserPerson(GetResponseEvent $event)
-    {
-        if (!$event->getRequest()->attributes->has('_user_person')) return;
-        
-        $securityContext = $this->container->get('security.context');
-        
-        // First the user
-        $token = $securityContext->getToken();
-        if (!$token) throw new AccessDeniedException();
-
-        $user = $token->getUser();
-        if (!is_object($user)) throw new AccessDeniedException();
-        
-        $request = $event->getRequest();
-        $request->attributes->set('user',$user);
- 
-        // Then the person
-        $event = new PersonFindEvent;
-        $event->guid   = $user->getPersonGuid();
-        $event->person = null;
-        $dispatcher = $this->container->get('event_dispatcher');
-        $dispatcher->dispatch(PersonEvents::FindPersonByGuid,$event);
-        
-        $userPerson = $event->person;
-        
-        if (!$userPerson) throw new AccessDeniedException();
-        
-        // Cross link
-        $userPerson->setUser($user);
-        $user->setPerson($userPerson);
-        
-        $request->attributes->set('userPerson',$userPerson);
-    }
-    /* ======================================================
-     * This might be going too far
-     * But it wolud be nice in some cases
-     */
-    protected function onKernelRequestUserPersonPlan(GetResponseEvent $event)
-    {
-        if (!$event->getRequest()->attributes->has('_user_person_plan')) return;
-    }
-    /* =======================================================
-     * Main processor
-     */
-    public function onKernelRequest(GetResponseEvent $event)
-    {die('CoreRequestListener');
-        // Will a sub request ever change this?
-        if (HttpKernel::MASTER_REQUEST != $event->getRequestType()) return;
-        
-        // Process any roles stuff
-        $this->onKernelRequestRole($event);
-        
-        // Grab the user person is asked
-        $this->onKernelRequestUserPerson($event);
-        
-        // Only process routes asking for a model
-        if (!$event->getRequest()->attributes->has('_model')) return;
-        
-        // Only process routes with a model
-        $request      = $event->getRequest();
-        $requestAttrs = $request->attributes;
-        
-        $modelFactoryServiceId = $requestAttrs->get('_model');
-        
-        $modelFactory = $this->container->get($modelFactoryServiceId);
-        
-        $model = $modelFactory->create($request);
-        
-        $requestAttrs->set('model',$model);
-        
-        // Have a form?
-        $formFactoryServiceId = $requestAttrs->get('_form');
-        if (!$formFactoryServiceId) return;
-        
-        $formFactory = $this->container->get($formFactoryServiceId);
-       
-        $form = $formFactory->create($request,$model);
-        
-        $requestAttrs->set('form',$form);
     }
 }
