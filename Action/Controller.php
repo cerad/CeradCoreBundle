@@ -36,7 +36,7 @@ class Controller
     {
         return new RedirectResponse($this->generateUrl($path,$params));
     }
-    protected function renderResponse($tplName, $tplData = array())
+    protected function regularResponse($tplName, $tplData = array())
     {
         return $this->templating->renderResponse($tplName, $tplData);
     }

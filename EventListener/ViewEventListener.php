@@ -7,7 +7,6 @@ use Symfony\Component\DependencyInjection\ContainerAware;
 use Symfony\Component\HttpKernel\HttpKernel;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -37,37 +36,19 @@ use Cerad\Bundle\CoreBundle\Event\FindProjectEvent;
  */
 class ModelEventListener extends ContainerAware implements EventSubscriberInterface
 {
+    
     public static function getSubscribedEvents()
     {
-        return array(
-            KernelEvents::CONTROLLER => array(
-                array('doRole',          -1100),
-                array('doUser',          -1200),
-                array('doUserPerson',    -1210),
-                array('doProject',       -1300),
-                array('doPerson',        -1400),
-              //array('doProjectPerson', -1210),
-                array('doModel',         -1900),
-                array('doModelForm',     -1910),
-            ),
-            KernelEvents::VIEW => array(
-                array('doView',          -2100),
-            ),
-        );
-    }
-    public function doView(GetResponseForControllerResultEvent $doEvent)
-    {
-        if (!$doEvent->getRequest()->attributes->has('_view')) return;
-        
-        $request = $doEvent->getRequest();
-        
-        $viewServiceId = $request->attributes->get('_view');
-        
-        $view = $this->container->get($viewServiceId);
-     
-        $viewResponse = $view->renderResponse($request);
-        
-        $doEvent->setResponse($viewResponse);
+        return array(KernelEvents::CONTROLLER => array(
+            array('doRole',          -1100),
+            array('doUser',          -1200),
+            array('doUserPerson',    -1210),
+            array('doProject',       -1300),
+            array('doPerson',        -1400),
+          //array('doProjectPerson', -1210),
+            array('doModel',         -1900),
+            array('doModelForm',     -1910),
+        ));
     }
     /* =============================================================
      * Allows protecting each route while defining the route
