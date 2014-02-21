@@ -2,21 +2,26 @@
 
 namespace Cerad\Bundle\CoreBundle\Action;
 
-use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use Symfony\Component\Form\FormFactoryInterface;
 
-abstract class ActionFormFactory
+class ActionFormFactory
 {
     protected $router;
+    protected $dispatcher;
     protected $formFactory;
     
     public function setRouter(RouterInterface $router)     
     { 
         $this->router = $router;
+    }
+    public function setDispatcher(EventDispatcherInterface $dispatcher) 
+    { 
+        $this->dispatcher = $dispatcher; 
     }
     public function setFormFactory(FormFactoryInterface $formFactory) 
     { 
@@ -26,5 +31,4 @@ abstract class ActionFormFactory
     {
         return $this->router->generate($route, $parameters, $referenceType);
     }
-    abstract public function create(Request $request, $model);
 }

@@ -18,4 +18,6 @@ final class PersonEvents
     const FindPlanByProjectAndPersonName = 'CeradPersonFindPlanByProjectAndPersonName';
     
     const RegisterProjectPerson = 'CeradPersonRegisterProjectPerson';
+    
+    const FindFedKeyFormType = 'CeradPersonFindFedKeyFormType';
 }

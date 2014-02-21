@@ -30,6 +30,8 @@ class CoreExtension extends \Twig_Extension
         }
         $defaults = array_merge($route->getDefaults(),$attributes);
         
+      //$defaults['_route'] = $routeName;
+        
         $controller = $defaults['_controller'];
         
         return new ControllerReference($controller, $defaults, $query);
