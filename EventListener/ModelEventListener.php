@@ -134,8 +134,11 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         
         $person = $findPersonEvent->getPerson();
         
-        if (!$person) throw new NotFoundHttpException('No Person For User');
-
+        if (!$person) 
+        {
+            $message = sprintf('No Person For User, %s %s',$user->getAccountName(),$user->getPersonGuid());
+            throw new NotFoundHttpException($message);
+        }
         $request->attributes->set('userPerson',$person);
     }
     /* =======================================================
