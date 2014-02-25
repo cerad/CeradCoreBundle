@@ -24,7 +24,8 @@ use Cerad\Bundle\CoreBundle\Events\ProjectEvents;
 use Cerad\Bundle\CoreBundle\Event\FindPersonEvent;
 use Cerad\Bundle\CoreBundle\Event\FindProjectEvent;
 
-//  Cerad\Bundle\CoreBundle\Event\Person\FindPlanByProjectAndPersonEvent;
+use Cerad\Bundle\CoreBundle\Event\User\FindUserEvent;
+
 
 /* ========================================================
  * Rather poorly named but takes care of creating the model,form and possible view
@@ -42,8 +43,9 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         return array(
             KernelEvents::CONTROLLER => array(
                 array('doRole',          -1100),
-                array('doUser',          -1200),
-                array('doUserPerson',    -1210),
+                array('doUser',          -1200),  // Logged in user
+                array('doUserPerson',    -1210),  // Logged in user person
+                array('doUserFind',      -1220),  // Passed as argument
                 array('doProject',       -1300),
                 array('doPerson',        -1400),
               //array('doProjectPerson', -1210),
@@ -110,6 +112,7 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
     public function doUserPerson(FilterControllerEvent $doEvent)
     {
         if (!$doEvent->getRequest()->attributes->has('_userPerson')) return;
+        
       //die('doUserPerson 1');
         // Need a user first
         $request = $doEvent->getRequest();
@@ -140,6 +143,22 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
             throw new NotFoundHttpException($message);
         }
         $request->attributes->set('userPerson',$person);
+    }
+    public function doUserFind(FilterControllerEvent $doEvent)
+    {
+        if (!$doEvent->getRequest()->attributes->has('_userFind')) return;
+        
+        $request = $doEvent->getRequest();
+        
+        $search = $request->attributes->get('_userFind');
+        $findUserEvent = new FindUserEvent($search);
+        $dispatcher = $this->container->get('event_dispatcher');
+        $dispatcher->dispatch(FindUserEvent::NAME,$findUserEvent);
+
+        $user = $findUserEvent->getUser();
+        if (!$user) throw new NotFoundHttpException('User not found ' . $search);
+        
+        $request->attributes->set('user',$user);
     }
     /* =======================================================
      * I think we want this to be completely self contained
