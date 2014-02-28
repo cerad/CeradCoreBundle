@@ -19,6 +19,7 @@ class CoreExtension extends \Twig_Extension
     {
         return array(
             new \Twig_SimpleFunction('route', array($this, 'route')),
+            new \Twig_SimpleFunction('local', array($this, 'local')),
         );
     }
     public function route($routeName, $attributes = array(), $query = array())
@@ -36,6 +37,10 @@ class CoreExtension extends \Twig_Extension
         
         return new ControllerReference($controller, $defaults, $query);
     }
-
+    public function local($self,$name)
+    {
+        $dir = dirname($self->getTemplateName());
+        return $dir . DIRECTORY_SEPARATOR . $name;
+    }
     public function getName() { return 'cerad_core'; }
 }
