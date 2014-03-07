@@ -27,6 +27,11 @@ services:
         class:  '%cerad_core__p3p_response_listener__class%'
         tags:
             - { name: kernel.event_subscriber }
+            
+    cerad_core__exception_listener:
+        class:   Cerad\Bundle\CoreBundle\EventListener\ExceptionListener
+        tags:
+            - { name: kernel.event_subscriber }
 
 # =======================================================================
 # Twig Extension
