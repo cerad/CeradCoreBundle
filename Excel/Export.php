@@ -69,12 +69,22 @@ class Export
 
             if (in_array($header,$this->columnCenters) == true)
             {
-                $coord = \PHPExcel_Cell::stringFromColumnIndex($col) . $row;
+              //$coord = \PHPExcel_Cell::stringFromColumnIndex($col) . $row;
                 
               //$ws->getStyle($coord)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
               $ws->getStyle($col)->getAlignment()->setHorizontal(\PHPExcel_Style_Alignment::HORIZONTAL_CENTER);
             }
             $col++;
+        }
+        return $row;
+    }
+    protected function setRow($ws,$map,$item,&$row)
+    {
+        $row++;
+        $col = 0;
+        foreach($map as $propName)
+        {
+            $ws->setCellValueByColumnAndRow($col++,$row,$item[$propName]);
         }
         return $row;
     }
