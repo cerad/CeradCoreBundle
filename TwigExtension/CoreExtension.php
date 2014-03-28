@@ -40,7 +40,8 @@ class CoreExtension extends \Twig_Extension
     public function local($self,$name)
     {
         $dir = dirname($self->getTemplateName());
-        return $dir . DIRECTORY_SEPARATOR . $name;
+        $local = $dir . '/' . $name; //die($local);
+        return $local;
     }
     public function getName() { return 'cerad_core'; }
 }
