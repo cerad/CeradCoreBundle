@@ -174,6 +174,12 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         // Pull the search
         $projectSearch = $eventx->getRequest()->attributes->get('_project');
         
+        if (!$projectSearch) 
+        {
+            // Use default project of non-specified
+            $projectSearch = $this->container->getParameter('cerad_project_project_default');
+        }
+      
         // Then the project
         $findProjectEvent = new FindProjectEvent($projectSearch);
         $dispatcher = $this->container->get('event_dispatcher');
