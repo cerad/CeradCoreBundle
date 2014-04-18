@@ -191,6 +191,9 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         
         // Stash it
         $eventx->getRequest()->attributes->set('project',$project);
+        
+        $twig = $this->container->get('twig');
+        $twig->addGlobal('project',$project);
     }
     public function doPerson(FilterControllerEvent $eventx)
     {
