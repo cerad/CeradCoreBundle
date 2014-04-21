@@ -162,11 +162,14 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
     }
     /* =======================================================
      * I think we want this to be completely self contained
+     * 20 Apr 2016
+     * Commented out the MASTER_REQUEST filter
+     * A form sub-request was not passing down the project?
      */
     public function doProject(FilterControllerEvent $eventx)
     {
         // Will a sub request ever change projects?
-        if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
+      //if (HttpKernel::MASTER_REQUEST != $eventx->getRequestType()) return;
         
         // Only process routes asking for a project
         if (!$eventx->getRequest()->attributes->has('_project')) return;
