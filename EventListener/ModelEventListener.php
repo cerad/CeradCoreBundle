@@ -18,9 +18,11 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
  * This causes core to depend on other bundles
  * Really want each bundle to depend on the core
  */
+use Cerad\Bundle\CoreBundle\Events\GameEvents;
 use Cerad\Bundle\CoreBundle\Events\PersonEvents;
 use Cerad\Bundle\CoreBundle\Events\ProjectEvents;
 
+use Cerad\Bundle\CoreBundle\Event\FindGameEvent;
 use Cerad\Bundle\CoreBundle\Event\FindPersonEvent;
 use Cerad\Bundle\CoreBundle\Event\FindProjectEvent;
 
@@ -49,6 +51,9 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
                 array('doProject',       -1300),
                 array('doPerson',        -1400),
               //array('doProjectPerson', -1210),
+                
+                array('doGame',          -1600),
+                
                 array('doModel',         -1900),
                 array('doModelForm',     -1910),
             ),
@@ -113,16 +118,12 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
     {
         if (!$doEvent->getRequest()->attributes->has('_userPerson')) return;
         
-      //die('doUserPerson 1');
         // Need a user first
         $request = $doEvent->getRequest();
         if (!$request->attributes->has('user'))
         {
-           //die('doUserPerson 2');
             $request->attributes->set('_user',true);
-          //die('doUserPerson 3');
             $this->doUser($doEvent);
-          //die('doUserPerson 4');
             if (!$request->attributes->has('user')) return;
         }
       //die('doUserPerson 5');
@@ -221,6 +222,31 @@ class ModelEventListener extends ContainerAware implements EventSubscriberInterf
         
         // Stash it
         $request->attributes->set('person',$person);
+    }
+    public function doGame(FilterControllerEvent $eventx)
+    {
+        if (!$eventx->getRequest()->attributes->has('_game')) return;
+        
+        $request = $eventx->getRequest();
+        
+        $gameNum = $request->attributes->get('_game');
+        $project = $request->attributes->get('project');
+        
+        
+        // Find The Game
+        $findGameEvent = new FindGameEvent($project,$gameNum);
+        $dispatcher = $this->container->get('event_dispatcher');
+        $dispatcher->dispatch(GameEvents::FindGame,$findGameEvent);
+        
+        $game = $findGameEvent->getGame();
+        
+        if (!$game)
+        {
+            $projectKey = $project ? $project->getSlug() : 'NO PROJECT';
+            throw new NotFoundHttpException(sprintf('Game Not Found: %s %d',$projectKey,$gameNum));
+        }
+        // Stash It
+        $request->attributes->set('game',$game);
     }
     /* ==========================================================
      * The Model
