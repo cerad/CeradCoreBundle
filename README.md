@@ -16,8 +16,11 @@ Installed it for appgames.  Seemed to go okay though readme was one version out 
 Try checking from the vendor directory.
 
 git remote -v shows composer and origin.  The origin is not set to https.
+
 git remote rm composer origin
+
 git remote add origin https://github.com/cerad/CeradCoreBundle
 
 Tried deleting CoreBundle then doing git clone.
 
+So far so good.  Netbeans remote push works.
